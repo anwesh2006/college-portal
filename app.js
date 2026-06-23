@@ -12,6 +12,9 @@ require('dotenv').config();
 
 const app = express();
 
+// Trust proxy for secure cookies in production (Vercel)
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 require('./config/db');
 
