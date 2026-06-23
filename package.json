@@ -1,0 +1,37 @@
+{
+    "name": "college-portal",
+    "version": "1.0.0",
+    "description": "A college student portal application",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "nodemon app.js"
+    },
+    "keywords": [
+        "college",
+        "portal",
+        "student"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^6.0.0",
+        "bcryptjs": "^2.4.3",
+        "body-parser": "^2.2.2",
+        "cookie-session": "^2.1.1",
+        "dotenv": "^16.6.1",
+        "ejs": "^3.1.10",
+        "express": "^4.22.1",
+        "express-ejs-layouts": "^2.5.1",
+        "express-session": "^1.17.3",
+        "express-validator": "^7.0.0",
+        "method-override": "^3.0.0",
+        "mongoose": "^7.8.9",
+        "morgan": "^1.10.0",
+        "multer": "^2.1.1",
+        "nodemailer": "^6.9.1"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.22"
+    }
+}
