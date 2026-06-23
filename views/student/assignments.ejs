@@ -1,0 +1,137 @@
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">My Assignments</h2>
+            <p class="text-muted mb-0">View and submit assignments for your enrolled courses</p>
+        </div>
+    </div>
+
+    <% if (courseAssignments.length === 0) { %>
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">No Assignments</h4>
+                <p class="text-muted">You don't have any assignments yet. They'll appear here when your faculty creates them.</p>
+            </div>
+        </div>
+    <% } else { %>
+        <% courseAssignments.forEach(ca => { %>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-book me-2 text-primary"></i>
+                        <%= ca.course.title %> <span class="badge bg-secondary ms-1"><%= ca.course.code %></span>
+                    </h5>
+                    <span class="badge bg-primary rounded-pill"><%= ca.assignments.length %> assignment<%= ca.assignments.length !== 1 ? 's' : '' %></span>
+                </div>
+                <div class="card-body p-0">
+                    <% ca.assignments.forEach(a => { %>
+                        <% const isOverdue = new Date(a.dueDate) < new Date(); %>
+                        <% const sub = a.submission; %>
+                        <div class="border-bottom p-3" style="border-left: 4px solid <%= sub && sub.status === 'graded' ? '#28a745' : (isOverdue && !sub ? '#dc3545' : '#4f8cff') %>;">
+                            <div class="row align-items-center">
+                                <div class="col-md-5">
+                                    <h6 class="mb-1 fw-bold"><%= a.title %></h6>
+                                    <p class="text-muted mb-1" style="font-size: 0.85rem;"><%= a.description || 'No description provided' %></p>
+                                    <div class="d-flex gap-3" style="font-size: 0.8rem;">
+                                        <span class="<%= isOverdue ? 'text-danger' : 'text-muted' %>">
+                                            <i class="bi bi-calendar me-1"></i>Due: <strong><%= new Date(a.dueDate).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) %></strong>
+                                        </span>
+                                        <span class="text-muted">
+                                            <i class="bi bi-star me-1"></i>Marks: <strong><%= a.totalMarks %></strong>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <% if (sub) { %>
+                                        <% if (sub.status === 'graded') { %>
+                                            <div>
+                                                <span class="badge bg-success px-3 py-2 fs-6"><%= sub.marks %>/<%= a.totalMarks %></span>
+                                                <br>
+                                                <small class="text-success fw-medium"><i class="bi bi-check-circle me-1"></i>Graded</small>
+                                                <% if (sub.feedback) { %>
+                                                    <br><small class="text-muted fst-italic">"<%= sub.feedback %>"</small>
+                                                <% } %>
+                                            </div>
+                                        <% } else { %>
+                                            <span class="badge bg-warning text-dark px-3 py-2">
+                                                <i class="bi bi-hourglass me-1"></i>Submitted — Pending Review
+                                            </span>
+                                            <br><small class="text-muted">Submitted: <%= new Date(sub.submittedAt).toLocaleDateString('en-IN') %></small>
+                                        <% } %>
+                                    <% } else if (isOverdue) { %>
+                                        <span class="badge bg-danger px-3 py-2">
+                                            <i class="bi bi-x-circle me-1"></i>Past Due — Not Submitted
+                                        </span>
+                                    <% } else { %>
+                                        <span class="badge bg-info text-dark px-3 py-2">
+                                            <i class="bi bi-clock me-1"></i>Not Submitted
+                                        </span>
+                                    <% } %>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <% if (sub && sub.status === 'graded') { %>
+                                        <span class="text-muted" style="font-size:0.85rem;">
+                                            <i class="bi bi-file-earmark-check me-1"></i><%= sub.originalFileName || 'Submitted' %>
+                                        </span>
+                                    <% } else { %>
+                                        <form class="d-inline submit-form" data-assignment="<%= a._id %>">
+                                            <div class="input-group input-group-sm" style="max-width: 280px; display: inline-flex;">
+                                                <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.pptx,.zip,.jpg,.png,.txt" required>
+                                                <button type="submit" class="btn btn-primary submit-btn">
+                                                    <i class="bi bi-upload"></i> <%= sub ? 'Resubmit' : 'Submit' %>
+                                                </button>
+                                            </div>
+                                            <div class="submit-msg mt-1" style="font-size:0.8rem;"></div>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% }); %>
+    <% } %>
+</div>
+
+<script>
+    document.querySelectorAll('.submit-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const assignmentId = this.dataset.assignment;
+            const fileInput = this.querySelector('input[type="file"]');
+            const btn = this.querySelector('.submit-btn');
+            const msgEl = this.querySelector('.submit-msg');
+
+            if (!fileInput.files[0]) { alert('Please select a file'); return; }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Uploading...';
+
+            fetch('/student/assignments/' + assignmentId + '/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    msgEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Submitted!</span>';
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    msgEl.innerHTML = '<span class="text-danger">' + (data.error || 'Failed') + '</span>';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-upload"></i> Submit';
+                }
+            })
+            .catch(() => {
+                msgEl.innerHTML = '<span class="text-danger">Upload failed</span>';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-upload"></i> Submit';
+            });
+        });
+    });
+</script>

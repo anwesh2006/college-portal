@@ -1,0 +1,127 @@
+<div class="container mt-5">
+
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <h4 class="alert-heading">Welcome, <%= locals.user ? locals.user.name : 'Faculty' %>!</h4>
+        <p>This is your faculty dashboard. Manage your courses and connect with students.</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">My Courses</h5>
+                    <h2><%= locals.courses ? courses.length : 0 %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Students</h5>
+                    <h2><%= locals.totalStudents || 0 %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Assignments</h5>
+                    <h2><%= locals.totalAssignments || 0 %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Notices</h5>
+                    <h2><%= locals.notices ? notices.length : 0 %></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Courses -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">My Courses</h5>
+            <a href="/courses" class="btn btn-sm btn-primary">View All Courses</a>
+        </div>
+        <div class="card-body">
+            <% if (locals.courses && courses.length> 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Title</th>
+                                <th>Department</th>
+                                <th>Enrolled</th>
+                                <th>Slots</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% courses.forEach(course=> { %>
+                                <tr>
+                                    <td><span class="badge bg-secondary">
+                                            <%= course.code %>
+                                        </span></td>
+                                    <td>
+                                        <%= course.title %>
+                                    </td>
+                                    <td>
+                                        <%= course.department %>
+                                    </td>
+                                    <td>
+                                        <%= course.enrolledCount || 0 %>
+                                    </td>
+                                    <td>
+                                        <%= course.totalSlots %>
+                                    </td>
+                                    <td>
+                                        <a href="/faculty/courses/<%= course._id %>" class="btn btn-sm btn-outline-primary">View Students</a>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <% } else { %>
+                    <p class="text-center text-muted py-3">No courses assigned to you yet.</p>
+                    <% } %>
+        </div>
+    </div>
+
+    <!-- Recent Notices -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Recent Notices</h5>
+            <a href="/notices" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="card-body">
+            <% if (locals.notices && notices.length> 0) { %>
+                <ul class="list-group list-group-flush">
+                    <% notices.forEach(notice=> { %>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <div>
+                                <h6 class="mb-1">
+                                    <%= notice.title %>
+                                </h6>
+                                <small class="text-muted">
+                                    <%= notice.body ? notice.body.substring(0, 80) : '' %>...
+                                </small>
+                            </div>
+                            <small class="text-muted">
+                                <%= new Date(notice.createdAt).toLocaleDateString() %>
+                            </small>
+                        </li>
+                        <% }); %>
+                </ul>
+                <% } else { %>
+                    <p class="text-center text-muted py-3">No notices.</p>
+                    <% } %>
+        </div>
+    </div>
+</div>

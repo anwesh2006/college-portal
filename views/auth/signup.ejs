@@ -1,0 +1,160 @@
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow" style="max-width: 520px; width: 100%;">
+        <div class="card-body p-4">
+
+            <h2 class="text-center mb-4">Create Account</h2>
+
+            <% if (locals.errors && errors.length> 0) { %>
+                <div class="alert alert-danger">
+                    <% errors.forEach(err=> { %>
+                        <div>
+                            <%= err.msg %>
+                        </div>
+                        <% }); %>
+                </div>
+                <% } %>
+
+                    <form action="/auth/signup" method="POST">
+
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="fullName" class="form-control"
+                                value="<%= locals.old ? old.fullName || '' : '' %>" required>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control"
+                                value="<%= locals.old ? old.email || '' : '' %>" required>
+                        </div>
+
+                        <!-- Role (no admin option) -->
+                        <div class="mb-3">
+                            <label class="form-label">Register as</label>
+                            <select name="role" id="roleSelect" class="form-select" required>
+                                <option value="">Select Role</option>
+                                <option value="student" <%=(locals.old && old.role==='student' ) ? 'selected' : '' %>
+                                    >Student</option>
+                                <option value="faculty" <%=(locals.old && old.role==='faculty' ) ? 'selected' : '' %>
+                                    >Faculty</option>
+                            </select>
+                        </div>
+
+                        <!-- Faculty ID (faculty only) -->
+                        <div class="mb-3" id="facultyIdGroup" style="display: none;">
+                            <label class="form-label">Faculty ID <small class="text-muted">(provided by
+                                    administration)</small></label>
+                            <input type="text" name="facultyId" id="facultyIdInput" class="form-control"
+                                placeholder="e.g. FAC1001" value="<%= locals.old ? old.facultyId || '' : '' %>">
+                            <div class="form-text text-muted">Enter the Faculty ID assigned to you by the college
+                                administration.</div>
+                        </div>
+
+                        <!-- Department (student only) -->
+                        <div class="mb-3" id="departmentGroup" style="display: none;">
+                            <label class="form-label">Department</label>
+                            <select name="department" id="departmentSelect" class="form-select">
+                                <option value="">Select Department</option>
+                                <option value="CS" <%=(locals.old && old.department==='CS' ) ? 'selected' : '' %>
+                                    >Computer Science</option>
+                                <option value="EC" <%=(locals.old && old.department==='EC' ) ? 'selected' : '' %>
+                                    >Electronics & Communication</option>
+                                <option value="ME" <%=(locals.old && old.department==='ME' ) ? 'selected' : '' %>
+                                    >Mechanical Engineering</option>
+                                <option value="CE" <%=(locals.old && old.department==='CE' ) ? 'selected' : '' %>>Civil
+                                    Engineering</option>
+                                <option value="EE" <%=(locals.old && old.department==='EE' ) ? 'selected' : '' %>
+                                    >Electrical Engineering</option>
+                                <option value="IT" <%=(locals.old && old.department==='IT' ) ? 'selected' : '' %>
+                                    >Information Technology</option>
+                                <option value="BT" <%=(locals.old && old.department==='BT' ) ? 'selected' : '' %>
+                                    >Biotechnology</option>
+                                <option value="CH" <%=(locals.old && old.department==='CH' ) ? 'selected' : '' %>
+                                    >Chemical Engineering</option>
+                            </select>
+                        </div>
+
+                        <!-- Semester (student only) -->
+                        <div class="mb-3" id="semesterGroup" style="display: none;">
+                            <label class="form-label">Current Semester</label>
+                            <select name="semester" id="semesterSelect" class="form-select">
+                                <option value="">Select Semester</option>
+                                <option value="1" <%=(locals.old && old.semester==='1' ) ? 'selected' : '' %>>Semester 1
+                                </option>
+                                <option value="2" <%=(locals.old && old.semester==='2' ) ? 'selected' : '' %>>Semester 2
+                                </option>
+                                <option value="3" <%=(locals.old && old.semester==='3' ) ? 'selected' : '' %>>Semester 3
+                                </option>
+                                <option value="4" <%=(locals.old && old.semester==='4' ) ? 'selected' : '' %>>Semester 4
+                                </option>
+                                <option value="5" <%=(locals.old && old.semester==='5' ) ? 'selected' : '' %>>Semester 5
+                                </option>
+                                <option value="6" <%=(locals.old && old.semester==='6' ) ? 'selected' : '' %>>Semester 6
+                                </option>
+                                <option value="7" <%=(locals.old && old.semester==='7' ) ? 'selected' : '' %>>Semester 7
+                                </option>
+                                <option value="8" <%=(locals.old && old.semester==='8' ) ? 'selected' : '' %>>Semester 8
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label class="form-label">Password <small class="text-muted">(min 8
+                                    characters)</small></label>
+                            <input type="password" name="password" class="form-control" minlength="8" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            Sign Up
+                        </button>
+                    </form>
+
+                    <p class="text-center mt-3">
+                        Already have an account?
+                        <a href="/auth/login">Login</a>
+                    </p>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const roleSelect = document.getElementById('roleSelect');
+    const facultyIdGroup = document.getElementById('facultyIdGroup');
+    const facultyIdInput = document.getElementById('facultyIdInput');
+    const departmentGroup = document.getElementById('departmentGroup');
+    const semesterGroup = document.getElementById('semesterGroup');
+    const departmentSelect = document.getElementById('departmentSelect');
+    const semesterSelect = document.getElementById('semesterSelect');
+
+    function toggleFields() {
+        const role = roleSelect.value;
+        const isStudent = (role === 'student');
+        const isFaculty = (role === 'faculty');
+
+        // Student fields
+        departmentGroup.style.display = isStudent ? '' : 'none';
+        semesterGroup.style.display = isStudent ? '' : 'none';
+        departmentSelect.required = isStudent;
+        semesterSelect.required = isStudent;
+
+        // Faculty fields
+        facultyIdGroup.style.display = isFaculty ? '' : 'none';
+        facultyIdInput.required = isFaculty;
+
+        // Clear hidden fields
+        if (!isStudent) {
+            departmentSelect.value = '';
+            semesterSelect.value = '';
+        }
+        if (!isFaculty) {
+            facultyIdInput.value = '';
+        }
+    }
+
+    roleSelect.addEventListener('change', toggleFields);
+    toggleFields(); // Run on page load
+</script>

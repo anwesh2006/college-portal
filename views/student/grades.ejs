@@ -1,0 +1,99 @@
+<div class="container mt-5">
+    <h1 class="mb-4">My Grades</h1>
+
+    <% if (grades && grades.length> 0) { %>
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center p-3">
+                    <p class="text-muted mb-1">Current GPA</p>
+                    <h3 class="text-primary fw-bold">
+                        <%= typeof gpa==='number' ? gpa.toFixed(2) : gpa %> <small class="text-muted" style="font-size:0.5em;">/ 10</small>
+                    </h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-3">
+                    <p class="text-muted mb-1">Total Credits</p>
+                    <h3 class="text-primary fw-bold">
+                        <%= totalCredits %>
+                    </h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-3">
+                    <p class="text-muted mb-1">Courses Completed</p>
+                    <h3 class="text-primary fw-bold">
+                        <%= grades.length %>
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Filter -->
+        <div class="mb-3">
+            <input type="text" class="form-control" id="gradeSearch" placeholder="Search by course title...">
+        </div>
+
+        <!-- Grades Table -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Title</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                        <th>Credits</th>
+                    </tr>
+                </thead>
+                <tbody id="gradesTableBody">
+                    <% grades.forEach(grade=> { %>
+                        <tr class="grade-row">
+                            <td>
+                                <%= grade.courseId ? grade.courseId.code : 'N/A' %>
+                            </td>
+                            <td class="course-title">
+                                <%= grade.courseId ? grade.courseId.title : 'Unknown Course' %>
+                            </td>
+                            <td>
+                                <%= grade.marks %>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                <% if (grade.grade === 'A' || grade.grade === 'A+' || grade.grade === 'A-') { %>bg-success
+                                <% } else if (grade.grade === 'B' || grade.grade === 'B+' || grade.grade === 'B-') { %>bg-info
+                                <% } else if (grade.grade === 'C' || grade.grade === 'C+' || grade.grade === 'C-') { %>bg-warning text-dark
+                                <% } else { %>bg-danger
+                                <% } %>">
+                                    <%= grade.grade %>
+                                </span>
+                            </td>
+                            <td>
+                                <%= grade.courseId ? grade.courseId.credits : '-' %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <% } else { %>
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <h4>No Grades Yet</h4>
+                <p class="text-muted">You haven't completed any courses yet. Start exploring courses to earn grades.</p>
+                <a href="/courses" class="btn btn-primary mt-3">Browse Courses</a>
+            </div>
+            <% } %>
+</div>
+
+<script>
+    document.getElementById('gradeSearch')?.addEventListener('input', function () {
+        const filter = this.value.toLowerCase();
+        document.querySelectorAll('.grade-row').forEach(row => {
+            const title = row.querySelector('.course-title').textContent.toLowerCase();
+            row.style.display = title.includes(filter) ? '' : 'none';
+        });
+    });
+</script>

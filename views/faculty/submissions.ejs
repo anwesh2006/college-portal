@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= assignment.title %> - Submissions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #f0f2f5; }
+        .page-header { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; padding: 35px 0; margin-bottom: 30px; }
+        .table-container { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; }
+        body.dark-mode { background: #1a1d23 !important; }
+        body.dark-mode .table-container { background: #242830; border-color: #353a44; }
+    </style>
+    <script>if(localStorage.getItem('eduportal-dark-mode')==='true'){document.documentElement.classList.add('dark-mode');}</script>
+</head>
+<body>
+<script>if(localStorage.getItem('eduportal-dark-mode')==='true'){document.body.classList.add('dark-mode');}</script>
+
+    <%- include('../partials/navbar') %>
+
+    <div class="page-header">
+        <div class="container">
+            <h1 class="fw-bold mb-1"><%= assignment.title %></h1>
+            <p class="mb-0 opacity-75 fs-5">
+                <%= assignment.courseId.title %> (<%= assignment.courseId.code %>) ·
+                Due: <%= new Date(assignment.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %> ·
+                Total Marks: <%= assignment.totalMarks %>
+            </p>
+            <div class="mt-3">
+                <a href="/faculty/courses/<%= assignment.courseId._id %>" class="btn btn-light btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Course
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <!-- Stats -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 border-start border-primary border-4">
+                    <div class="card-body py-3">
+                        <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Submissions</h6>
+                        <h2 class="mb-0 text-primary"><%= submissions.length %> / <%= totalEnrolled %></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 border-start border-success border-4">
+                    <div class="card-body py-3">
+                        <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Graded</h6>
+                        <h2 class="mb-0 text-success"><%= submissions.filter(s => s.status === 'graded').length %></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 border-start border-warning border-4">
+                    <div class="card-body py-3">
+                        <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Pending Review</h6>
+                        <h2 class="mb-0 text-warning"><%= submissions.filter(s => s.status === 'pending').length %></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <% if (submissions.length > 0) { %>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Roll #</th>
+                            <th>File</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                            <th>Marks</th>
+                            <th>Feedback</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% submissions.forEach(sub => { %>
+                        <tr id="sub-<%= sub._id %>">
+                            <td class="fw-medium">
+                                <%= sub.studentId && sub.studentId.userId ? sub.studentId.userId.name : 'Unknown' %>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary"><%= sub.studentId ? sub.studentId.rollNumber : '—' %></span>
+                            </td>
+                            <td>
+                                <a href="/uploads/assignments/<%= sub.fileUrl.split('/').pop() %>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download me-1"></i><%= sub.originalFileName || 'Download' %>
+                                </a>
+                            </td>
+                            <td class="text-muted" style="font-size:0.85rem;">
+                                <% const late = new Date(sub.submittedAt) > new Date(assignment.dueDate); %>
+                                <%= new Date(sub.submittedAt).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) %>
+                                <% if (late) { %><br><span class="badge bg-danger bg-opacity-10 text-danger">Late</span><% } %>
+                            </td>
+                            <td>
+                                <% if (sub.status === 'graded') { %>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Graded</span>
+                                <% } else { %>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass me-1"></i>Pending</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm sub-marks"
+                                    value="<%= sub.marks != null ? sub.marks : '' %>"
+                                    min="0" max="<%= assignment.totalMarks %>" style="width:70px;"
+                                    placeholder="—" data-id="<%= sub._id %>">
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm sub-feedback"
+                                    value="<%= sub.feedback || '' %>"
+                                    placeholder="Feedback..." style="width:150px;"
+                                    data-id="<%= sub._id %>">
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary grade-sub-btn" data-id="<%= sub._id %>">
+                                    <i class="bi bi-check2"></i> Grade
+                                </button>
+                                <span class="grade-msg ms-1" id="msg-<%= sub._id %>"></span>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted" style="font-size:3rem;"></i>
+                <h5 class="mt-3">No Submissions Yet</h5>
+                <p class="text-muted">Students haven't submitted their work for this assignment.</p>
+            </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.grade-sub-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const subId = this.dataset.id;
+                const marks = document.querySelector(`.sub-marks[data-id="${subId}"]`).value;
+                const feedback = document.querySelector(`.sub-feedback[data-id="${subId}"]`).value;
+                const msgEl = document.getElementById('msg-' + subId);
+
+                if (marks === '') { alert('Please enter marks'); return; }
+
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+                fetch('/faculty/submissions/' + subId + '/grade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ marks, feedback })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        msgEl.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+                        // Update status badge
+                        const row = document.getElementById('sub-' + subId);
+                        const statusTd = row.querySelectorAll('td')[4];
+                        statusTd.innerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Graded</span>';
+                        setTimeout(() => msgEl.innerHTML = '', 3000);
+                    } else {
+                        alert(data.error || 'Failed');
+                    }
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-check2"></i> Grade';
+                })
+                .catch(() => {
+                    alert('Error');
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-check2"></i> Grade';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

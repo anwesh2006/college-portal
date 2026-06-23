@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EduPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f0f2f5;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar .brand {
+            padding: 15px 20px 25px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px 24px;
+            color: #a8b2c1;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-size: 0.92rem;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border-left-color: #4f8cff;
+        }
+
+        .sidebar a.active {
+            background: rgba(79, 140, 255, 0.15);
+            color: #4f8cff;
+            border-left-color: #4f8cff;
+            font-weight: 600;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 28px 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e8ecf1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4f8cff, #6c5ce7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.82rem;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .table-container {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+            margin-top: 28px;
+            border: 1px solid #e8ecf1;
+        }
+
+        .page-title {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: #1a1a2e;
+        }
+
+        .page-subtitle {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+        /* Dark Mode admin overrides */
+        body.dark-mode .admin-main { background: #1a1d23; color: #e0e0e0; }
+        body.dark-mode .page-title { color: #e0e0e0; }
+        body.dark-mode .stat-card { background: #242830; border-color: #353a44; }
+        body.dark-mode .table-container { background: #242830; border-color: #353a44; }
+        body.dark-mode .sidebar { background: linear-gradient(180deg, #111, #1a1a2e); }
+    </style>
+    <script>if(localStorage.getItem('eduportal-dark-mode')==='true'){document.documentElement.classList.add('dark-mode');}</script>
+</head>
+
+<body>
+<script>if(localStorage.getItem('eduportal-dark-mode')==='true'){document.body.classList.add('dark-mode');}</script>
+    <div class="admin-layout">
+        <%- include('partials/sidebar', { activePage: 'dashboard' }) %>
+
+            <div class="admin-main">
+                <h2 class="page-title mb-1">Dashboard</h2>
+                <p class="page-subtitle mb-4">Welcome back, Admin. Here's your overview.</p>
+
+                <!-- Stats Row -->
+                <div class="row g-4 mb-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-card">
+                            <div class="stat-number">
+                                <%= stats.totalUsers %>
+                            </div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-card">
+                            <div class="stat-number">
+                                <%= stats.totalStudents %>
+                            </div>
+                            <div class="stat-label">Students</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-card">
+                            <div class="stat-number">
+                                <%= stats.totalCourses %>
+                            </div>
+                            <div class="stat-label">Courses</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="stat-card">
+                            <div class="stat-number">
+                                <%= stats.totalEnrollments %>
+                            </div>
+                            <div class="stat-label">Enrollments</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Users -->
+                <div class="table-container">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-people me-2"></i>Recent Users</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (recentUsers && recentUsers.length> 0) { %>
+                                    <% recentUsers.forEach(u=> { %>
+                                        <tr id="user-<%= u._id %>">
+                                            <td class="fw-medium">
+                                                <%= u.name %>
+                                            </td>
+                                            <td class="text-muted">
+                                                <%= u.email %>
+                                            </td>
+                                            <td>
+                                                <span class="badge rounded-pill 
+                                    <% if (u.role === 'admin') { %>bg-danger
+                                    <% } else if (u.role === 'faculty') { %>bg-info text-dark
+                                    <% } else { %>bg-primary<% } %>">
+                                                    <%= u.role %>
+                                                </span>
+                                            </td>
+                                            <td class="text-muted">
+                                                <%= u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A' %>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="deleteUser('<%= u._id %>', '<%= u.name %>')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted py-3">No users yet.
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end mt-2"><a href="/admin/users" class="text-decoration-none">View all users →</a>
+                    </div>
+                </div>
+
+                <!-- Recent Notices -->
+                <div class="table-container">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-megaphone me-2"></i>Recent Notices</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Date</th>
+                                    <th>Pinned</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (recentNotices && recentNotices.length> 0) { %>
+                                    <% recentNotices.forEach(notice=> { %>
+                                        <tr>
+                                            <td class="fw-medium">
+                                                <%= notice.title %>
+                                            </td>
+                                            <td class="text-muted">
+                                                <%= (notice.author && notice.author.name) ? notice.author.name
+                                                    : 'System' %>
+                                            </td>
+                                            <td class="text-muted">
+                                                <%= new Date(notice.createdAt).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge <%= notice.isPinned ? 'bg-warning text-dark' : 'bg-secondary' %>">
+                                                    <%= notice.isPinned ? '★ Pinned' : 'No' %>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-3">No notices yet.
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function deleteUser(userId, name) {
+            if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+            fetch('/admin/users/' + userId, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) document.getElementById('user-' + userId)?.remove();
+                    else alert(data.error || 'Failed');
+                }).catch(() => alert('Error'));
+        }
+    </script>
+</body>
+
+</html>

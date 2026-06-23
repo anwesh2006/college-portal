@@ -1,0 +1,154 @@
+<div class="container-fluid mt-4">
+  
+  <!-- Welcome Banner -->
+  <div class="alert alert-primary alert-dismissible fade show" role="alert">
+    <h4 class="alert-heading">Welcome back, <%= student.name %>!</h4>
+    <p>Here's your academic dashboard. Keep track of your courses, grades, and important notices.</p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="row mb-5">
+    <div class="col-md-3 mb-3">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h5 class="card-title">Enrolled Courses</h5>
+          <h2><%= enrollments.length %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h5 class="card-title d-flex justify-content-between align-items-center">
+            GPA
+            <button class="btn btn-sm btn-outline-light" id="toggleGpaBtn" title="Hide / Show GPA">
+              <i class="bi bi-eye-slash" id="gpaToggleIcon"></i>
+              <span id="gpaToggleLabel">Hide</span>
+            </button>
+          </h5>
+          <div id="gpaValue">
+            <h2><%= (student.gpa || 0).toFixed(2) %> <small style="font-size:0.5em;opacity:0.8;">/ 10</small></h2>
+          </div>
+          <div id="gpaHidden" style="display:none;">
+            <h2 class="mb-0" style="letter-spacing:4px;">••••</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <h5 class="card-title">Attendance</h5>
+          <h2><%= student.attendancePercent || 0 %>%</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card bg-warning text-white">
+        <div class="card-body">
+          <h5 class="card-title">Notices</h5>
+          <h2><%= notices.length %></h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enrolled Courses Section -->
+  <div class="row mb-5">
+    <div class="col-md-12">
+      <h3 class="mb-3">Enrolled Courses</h3>
+      
+      <div class="mb-3">
+        <input type="text" class="form-control" id="courseFilter" placeholder="Filter by course title...">
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Course Title</th>
+              <th>Course Code</th>
+              <th>Department</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="coursesTableBody">
+            <% enrollments.forEach(enrollment => { %>
+              <% if (enrollment.courseId) { %>
+              <tr class="course-row">
+                <td><%= enrollment.courseId.title %></td>
+                <td><%= enrollment.courseId.code %></td>
+                <td><%= enrollment.courseId.department %></td>
+                <td><span class="badge bg-success"><%= enrollment.status %></span></td>
+              </tr>
+              <% } %>
+            <% }); %>
+            <% if (enrollments.length === 0) { %>
+            <tr>
+              <td colspan="4" class="text-center text-muted py-3">No courses enrolled yet. <a href="/courses">Browse courses</a></td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Notices Section -->
+  <div class="row">
+    <div class="col-md-12">
+      <h3 class="mb-3">Recent Notices</h3>
+      <ul class="list-group">
+        <% notices.slice(0, 3).forEach(notice => { %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1"><%= notice.title %></h6>
+              <p class="mb-0 text-muted"><%= notice.body ? notice.body.substring(0, 100) : '' %></p>
+            </div>
+            <span class="badge bg-secondary"><%= new Date(notice.createdAt).toLocaleDateString() %></span>
+          </li>
+        <% }); %>
+        <% if (notices.length === 0) { %>
+          <li class="list-group-item text-center text-muted">No notices right now.</li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Simple client-side course filter
+  document.getElementById('courseFilter')?.addEventListener('input', function() {
+    const filter = this.value.toLowerCase();
+    document.querySelectorAll('.course-row').forEach(row => {
+      const title = row.cells[0].textContent.toLowerCase();
+      row.style.display = title.includes(filter) ? '' : 'none';
+    });
+  });
+
+  // jQuery fadeIn / fadeOut GPA toggle
+  $(document).ready(function() {
+    var gpaVisible = true;
+
+    $('#toggleGpaBtn').on('click', function() {
+      if (gpaVisible) {
+        // Hide GPA with fadeOut, then show masked dots with fadeIn
+        $('#gpaValue').fadeOut(400, function() {
+          $('#gpaHidden').fadeIn(400);
+        });
+        $('#gpaToggleIcon').removeClass('bi-eye-slash').addClass('bi-eye');
+        $('#gpaToggleLabel').text('Show');
+      } else {
+        // Hide masked dots with fadeOut, then show GPA with fadeIn
+        $('#gpaHidden').fadeOut(400, function() {
+          $('#gpaValue').fadeIn(400);
+        });
+        $('#gpaToggleIcon').removeClass('bi-eye').addClass('bi-eye-slash');
+        $('#gpaToggleLabel').text('Hide');
+      }
+      gpaVisible = !gpaVisible;
+    });
+  });
+</script>

@@ -1,0 +1,113 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Student Profile</h5>
+                    <button id="editBtn" class="btn btn-sm btn-primary">Edit Profile</button>
+                </div>
+                <div class="card-body">
+                    <!-- View Mode -->
+                    <div id="viewMode">
+                        <div class="d-flex gap-3 align-items-center mb-4">
+                            <div
+                                style="width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:24px;color:white;background:linear-gradient(135deg,#667eea,#764ba2);">
+                                <%= name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : ' ?' %>
+                            </div>
+                            <div>
+                                <h4 class="mb-0">
+                                    <%= name %>
+                                </h4>
+                                <small class="text-muted">
+                                    <%= role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Student' %>
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="text-muted small fw-bold">Email</div>
+                                    <div>
+                                        <%= email %>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="text-muted small fw-bold">Roll Number</div>
+                                    <div>
+                                        <%= rollNumber %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="text-muted small fw-bold">Department</div>
+                                    <div>
+                                        <%= department %>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="text-muted small fw-bold">Semester</div>
+                                    <div>
+                                        <%= semester %>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="text-muted small fw-bold">Joined Date</div>
+                                    <div>
+                                        <%= joinedDate ? new Date(joinedDate).toLocaleDateString() : 'N/A' %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <div id="editMode" style="display: none;">
+                        <form action="/student/profile" method="POST">
+                            <div class="mb-3">
+                                <label for="department" class="form-label">Department</label>
+                                <select id="department" name="department" class="form-select">
+                                    <option value="CS" <%=department==='CS' ? 'selected' : '' %>>Computer Science
+                                    </option>
+                                    <option value="EC" <%=department==='EC' ? 'selected' : '' %>>Electronics</option>
+                                    <option value="ME" <%=department==='ME' ? 'selected' : '' %>>Mechanical</option>
+                                    <option value="CE" <%=department==='CE' ? 'selected' : '' %>>Civil</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="semester" class="form-label">Semester</label>
+                                <input type="number" id="semester" name="semester" class="form-control" min="1" max="8"
+                                    value="<%= semester %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone</label>
+                                <input type="tel" id="phone" name="phone" class="form-control"
+                                    value="<%= phone || '' %>">
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">Save Changes</button>
+                                <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('editBtn')?.addEventListener('click', function () {
+        document.getElementById('viewMode').style.display = 'none';
+        document.getElementById('editMode').style.display = 'block';
+    });
+
+    document.getElementById('cancelBtn')?.addEventListener('click', function () {
+        document.getElementById('editMode').style.display = 'none';
+        document.getElementById('viewMode').style.display = 'block';
+    });
+</script>

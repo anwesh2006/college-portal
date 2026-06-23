@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notices - EduPortal Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { margin: 0; background: #f0f2f5; }
+        .admin-layout { display: flex; min-height: 100vh; }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar .brand {
+            padding: 15px 20px 25px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar a {
+            display: block;
+            padding: 12px 24px;
+            color: #a8b2c1;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-size: 0.92rem;
+        }
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border-left-color: #4f8cff;
+        }
+        .sidebar a.active {
+            background: rgba(79, 140, 255, 0.15);
+            color: #4f8cff;
+            border-left-color: #4f8cff;
+            font-weight: 600;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+        .page-title { font-weight: 700; font-size: 1.8rem; color: #1a1a2e; }
+        .page-subtitle { color: #7f8c8d; font-size: 0.95rem; }
+
+        .notice-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            border: 1px solid #e8ecf1;
+        }
+
+        .notice-item {
+            padding: 16px 20px;
+            border: 1px solid #e8ecf1;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            background: #fafbfc;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .notice-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .notice-item.pinned {
+            border-left: 4px solid #f39c12;
+            background: #fffdf5;
+        }
+
+        /* Dark Mode admin overrides */
+        body.dark-mode { background: #111317; }
+        body.dark-mode .admin-main { background: #1a1d23; color: #e0e0e0; }
+        body.dark-mode .page-title { color: #e0e0e0; }
+        body.dark-mode .page-subtitle { color: #9aa0ac; }
+        body.dark-mode .notice-card { background: #242830; border-color: #353a44; }
+        body.dark-mode .notice-item { background: #1e2228; border-color: #353a44; color: #e0e0e0; }
+        body.dark-mode .notice-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        body.dark-mode .notice-item.pinned { background: #2a2620; border-left-color: #f39c12; }
+        body.dark-mode .notice-item h6 { color: #e0e0e0; }
+        body.dark-mode .notice-item .text-muted { color: #9aa0ac !important; }
+        body.dark-mode .sidebar { background: linear-gradient(180deg, #111, #1a1a2e); }
+        body.dark-mode .modal-content { background: #242830; color: #e0e0e0; border-color: #353a44; }
+        body.dark-mode .modal-header { border-color: #353a44; }
+        body.dark-mode .modal-footer { border-color: #353a44; }
+        body.dark-mode .form-control, body.dark-mode .form-select { background: #1a1d23; color: #e0e0e0; border-color: #353a44; }
+        body.dark-mode .form-control:focus, body.dark-mode .form-select:focus { background: #1a1d23; color: #e0e0e0; border-color: #4f8cff; }
+        body.dark-mode .form-label { color: #ccc; }
+        body.dark-mode .btn-close { filter: invert(1); }
+    </style>
+    <script>if(localStorage.getItem('eduportal-dark-mode')==='true'){document.documentElement.classList.add('dark-mode');}</script>
+</head>
+
+<body>
+<script>if(localStorage.getItem('eduportal-dark-mode')==='true'){document.body.classList.add('dark-mode');}</script>
+    <div class="admin-layout">
+        <%- include('partials/sidebar', { activePage: 'notices' }) %>
+
+            <div class="admin-main">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="page-title mb-1">Notices</h2>
+                        <p class="page-subtitle mb-0"><%= notices.length %> total notices</p>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                        <input type="text" class="form-control" id="noticeSearch" placeholder="Search notices..."
+                            style="width: 250px;">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal" style="white-space:nowrap">
+                            <i class="bi bi-plus-lg me-1"></i>Post Notice
+                        </button>
+                    </div>
+                </div>
+
+                <div class="notice-card">
+                    <!-- Pinned Notices -->
+                    <% var pinned = notices.filter(function(n){ return n.isPinned }); %>
+                    <% if (pinned.length !== 0) { %>
+                        <h6 class="fw-bold text-warning mb-3"><i class="bi bi-pin-fill me-1"></i>Pinned Notices</h6>
+                        <% pinned.forEach(function(notice) { %>
+                            <div class="notice-item pinned" id="notice-<%= notice._id %>">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-bold">
+                                            <span class="text-warning me-1">★</span>
+                                            <%= notice.title %>
+                                        </h6>
+                                        <p class="text-muted mb-2" style="font-size:0.9rem">
+                                            <%= notice.body ? notice.body.substring(0, 150) : '' %><% if (notice.body && notice.body.length !== 150) { %>...<% } %>
+                                        </p>
+                                        <small class="text-secondary">
+                                            By <%= notice.author && notice.author.name ? notice.author.name : 'Admin' %> &bull;
+                                            <%= new Date(notice.createdAt).toLocaleDateString() %>
+                                            <span class="badge bg-info ms-1"><%= notice.targetRole %></span>
+                                        </small>
+                                    </div>
+                                    <div class="ms-3 d-flex gap-1">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="togglePin('<%= notice._id %>')" title="Unpin">
+                                            <i class="bi bi-pin-angle"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteNotice('<%= notice._id %>')" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                        <hr class="my-3">
+                    <% } %>
+
+                    <!-- Regular Notices -->
+                    <% var regular = notices.filter(function(n){ return !n.isPinned }); %>
+                    <% if (regular.length !== 0) { %>
+                        <h6 class="fw-bold mb-3"><i class="bi bi-megaphone me-1"></i>All Notices</h6>
+                        <% regular.forEach(function(notice) { %>
+                            <div class="notice-item" id="notice-<%= notice._id %>" data-title="<%= notice.title.toLowerCase() %>">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold"><%= notice.title %></h6>
+                                        <p class="text-muted mb-2" style="font-size:0.9rem">
+                                            <%= notice.body ? notice.body.substring(0, 150) : '' %><% if (notice.body && notice.body.length !== 150) { %>...<% } %>
+                                        </p>
+                                        <small class="text-secondary">
+                                            By <%= notice.author && notice.author.name ? notice.author.name : 'Admin' %> &bull;
+                                            <%= new Date(notice.createdAt).toLocaleDateString() %>
+                                            <span class="badge bg-info ms-1"><%= notice.targetRole %></span>
+                                        </small>
+                                    </div>
+                                    <div class="ms-3 d-flex gap-1">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="togglePin('<%= notice._id %>')" title="Pin">
+                                            <i class="bi bi-pin"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteNotice('<%= notice._id %>')" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } %>
+
+                    <!-- Empty State -->
+                    <% if (notices.length === 0) { %>
+                        <div class="text-center py-5">
+                            <i class="bi bi-megaphone" style="font-size: 3rem; color: #ccc;"></i>
+                            <p class="text-muted mt-2">No notices yet. Post your first one!</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+    </div>
+
+    <!-- Post Notice Modal -->
+    <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:14px;overflow:hidden">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="postModalLabel"><i class="bi bi-megaphone me-2"></i>Post Notice</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="postError" class="alert alert-danger d-none"></div>
+                    <div id="postSuccess" class="alert alert-success d-none"></div>
+                    <form id="postNoticeForm">
+                        <div class="mb-3">
+                            <label for="noticeTitle" class="form-label">Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="noticeTitle" required placeholder="Notice title">
+                        </div>
+                        <div class="mb-3">
+                            <label for="noticeBody" class="form-label">Body <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="noticeBody" rows="4" required placeholder="Write your notice..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="noticeTarget" class="form-label">Target Audience</label>
+                            <select class="form-select" id="noticeTarget">
+                                <option value="all" selected>All</option>
+                                <option value="student">Students Only</option>
+                                <option value="faculty">Faculty Only</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitNotice" onclick="postNotice()">
+                        <i class="bi bi-send me-1"></i>Post
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search
+        document.getElementById('noticeSearch').addEventListener('input', function() {
+            var filter = this.value.toLowerCase();
+            document.querySelectorAll('.notice-item').forEach(function(item) {
+                var title = item.querySelector('h6').textContent.toLowerCase();
+                item.style.display = title.includes(filter) ? '' : 'none';
+            });
+        });
+
+        // Post notice via AJAX
+        function postNotice() {
+            var errBox = document.getElementById('postError');
+            var successBox = document.getElementById('postSuccess');
+            var btn = document.getElementById('submitNotice');
+            errBox.classList.add('d-none');
+            successBox.classList.add('d-none');
+
+            var title = document.getElementById('noticeTitle').value.trim();
+            var body = document.getElementById('noticeBody').value.trim();
+            var targetRole = document.getElementById('noticeTarget').value;
+
+            if (!title || !body) {
+                errBox.textContent = 'Title and body are required.';
+                errBox.classList.remove('d-none');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Posting...';
+
+            fetch('/notices', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: title, body: body, targetRole: targetRole })
+            })
+            .then(function(r) {
+                // The existing controller redirects, so handle both JSON and redirect
+                if (r.redirected) {
+                    successBox.textContent = 'Notice posted successfully!';
+                    successBox.classList.remove('d-none');
+                    document.getElementById('postNoticeForm').reset();
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-send me-1"></i>Post';
+                    setTimeout(function() { window.location.reload(); }, 1000);
+                    return;
+                }
+                return r.json();
+            })
+            .then(function(data) {
+                if (!data) return;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send me-1"></i>Post';
+                if (data.error) {
+                    errBox.textContent = data.error;
+                    errBox.classList.remove('d-none');
+                } else {
+                    successBox.textContent = 'Notice posted!';
+                    successBox.classList.remove('d-none');
+                    setTimeout(function() { window.location.reload(); }, 1000);
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send me-1"></i>Post';
+                // Probably a redirect; reload to see the new notice
+                window.location.reload();
+            });
+        }
+
+        // Delete notice
+        function deleteNotice(id) {
+            if (!confirm('Delete this notice? This cannot be undone.')) return;
+            fetch('/notices/' + id, { method: 'DELETE' })
+                .then(function() {
+                    var el = document.getElementById('notice-' + id);
+                    if (el) el.remove();
+                })
+                .catch(function() { alert('Error deleting notice'); });
+        }
+
+        // Toggle pin
+        function togglePin(id) {
+            fetch('/notices/' + id + '/pin', { method: 'PUT' })
+                .then(function(r) { return r.json(); })
+                .then(function() { window.location.reload(); })
+                .catch(function() { alert('Error updating pin status'); });
+        }
+    </script>
+</body>
+
+</html>

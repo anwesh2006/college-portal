@@ -1,0 +1,48 @@
+<footer class="bg-dark text-white mt-5 pt-4 border-top border-secondary">
+    <div class="container">
+        <div class="row mb-4">
+            <!-- Quick Links -->
+            <div class="col-md-4 col-sm-6 mb-3">
+                <h5 class="fw-bold">Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="/auth/login" class="text-decoration-none text-white-50 text-white-hover">Login</a></li>
+                    <li><a href="/notices" class="text-decoration-none text-white-50 text-white-hover">Notices</a></li>
+                    <li><a href="/courses" class="text-decoration-none text-white-50 text-white-hover">Courses</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="col-md-4 col-sm-6 mb-3">
+                <h5 class="fw-bold">Contact</h5>
+                <p class="text-white-50 mb-1">
+                    <i class="bi bi-envelope"></i> info@collegeportal.edu
+                </p>
+                <p class="text-white-50">
+                    <i class="bi bi-telephone"></i> +1 (555) 123-4567
+                </p>
+            </div>
+
+            <!-- About -->
+            <div class="col-md-4 col-sm-12 mb-3">
+                <h5 class="fw-bold">About</h5>
+                <p class="text-white-50">Your gateway to academic excellence and student success.</p>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <hr class="border-secondary">
+
+        <!-- Copyright -->
+        <div class="row py-3">
+            <div class="col-12 text-center">
+                <p class="text-white-50 mb-0">
+                    &copy; <span id="year"></span> College Portal. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>

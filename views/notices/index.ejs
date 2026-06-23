@@ -1,0 +1,156 @@
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Notice Board</h1>
+        <% if (locals.user && (locals.user.role==='admin' || locals.user.role==='faculty' )) { %>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postModal">
+                <i class="bi bi-plus"></i> Post Notice
+            </button>
+            <% } %>
+    </div>
+
+    <!-- Search Filter -->
+    <div class="mb-4">
+        <input type="text" class="form-control" id="noticeSearch" placeholder="Search notices by title...">
+    </div>
+
+    <!-- Pinned Notices -->
+    <% const pinned=notices.filter(n=> n.isPinned); %>
+        <% if (pinned.length> 0) { %>
+            <div class="mb-4">
+                <h5><i class="bi bi-pin-fill text-warning"></i> Pinned</h5>
+                <div class="list-group">
+                    <% pinned.forEach(notice=> { %>
+                        <div class="list-group-item notice-item">
+                            <div class="d-flex justify-content-between">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        <span class="text-warning">★</span>
+                                        <%= notice.title %>
+                                    </h6>
+                                    <p class="text-muted mb-2">
+                                        <%= notice.body ? notice.body.substring(0, 120) : '' %>...
+                                    </p>
+                                    <small class="text-secondary">
+                                        By <%= notice.author && notice.author.name ? notice.author.name : 'Admin' %> •
+                                            <%= new Date(notice.createdAt).toLocaleDateString() %>
+                                                <span class="badge bg-info">
+                                                    <%= notice.targetRole %>
+                                                </span>
+                                    </small>
+                                </div>
+                                <% if (locals.user && locals.user.role==='admin' ) { %>
+                                    <div class="ms-3">
+                                        <button class="btn btn-sm btn-danger"
+                                            onclick="deleteNotice('<%= notice._id %>')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    <% } %>
+                            </div>
+                        </div>
+                        <% }); %>
+                </div>
+            </div>
+            <% } %>
+
+                <!-- All Notices -->
+                <% const regular=notices.filter(n=> !n.isPinned); %>
+                    <% if (regular.length> 0) { %>
+                        <h5>All Notices</h5>
+                        <div class="list-group" id="noticesList">
+                            <% regular.forEach(notice=> { %>
+                                <div class="list-group-item notice-item" data-title="<%= notice.title.toLowerCase() %>">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">
+                                                <%= notice.title %>
+                                            </h6>
+                                            <p class="text-muted mb-2">
+                                                <%= notice.body ? notice.body.substring(0, 120) : '' %>...
+                                            </p>
+                                            <small class="text-secondary">
+                                                By <%= notice.author && notice.author.name ? notice.author.name
+                                                    : 'Admin' %> •
+                                                    <%= new Date(notice.createdAt).toLocaleDateString() %>
+                                                        <span class="badge bg-info">
+                                                            <%= notice.targetRole %>
+                                                        </span>
+                                            </small>
+                                        </div>
+                                        <% if (locals.user && locals.user.role==='admin' ) { %>
+                                            <div class="ms-3">
+                                                <button class="btn btn-sm btn-danger"
+                                                    onclick="deleteNotice('<%= notice._id %>')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                            <% } %>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } %>
+
+                            <!-- Empty State -->
+                            <% if (notices.length===0) { %>
+                                <div class="text-center py-5">
+                                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                    <p class="text-muted mt-2">No notices available</p>
+                                </div>
+                                <% } %>
+</div>
+
+<!-- Post Notice Modal -->
+<div class="modal fade" id="postModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Post Notice</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/notices" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Body</label>
+                        <textarea class="form-control" name="body" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Target Role</label>
+                        <select class="form-select" name="targetRole" required>
+                            <option value="all">All</option>
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Client-side search filter
+    document.getElementById('noticeSearch')?.addEventListener('input', function () {
+        const filter = this.value.toLowerCase();
+        document.querySelectorAll('.notice-item').forEach(item => {
+            const title = item.getAttribute('data-title') || item.querySelector('h6').textContent.toLowerCase();
+            item.style.display = title.includes(filter) ? '' : 'none';
+        });
+    });
+
+    // Delete notice via AJAX
+    function deleteNotice(id) {
+        if (!confirm('Delete this notice?')) return;
+        fetch('/notices/' + id, { method: 'DELETE' })
+            .then(() => window.location.reload())
+            .catch(err => alert('Error deleting notice'));
+    }
+</script>
