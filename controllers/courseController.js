@@ -2,6 +2,41 @@ const Course = require('../models/Course');
 const Enrollment = require('../models/Enrollment');
 const Student = require('../models/Student');
 
+// Helper to parse time string into minutes from midnight (e.g. "9:00", "11:30", "1:00", "2:00")
+function parseTimeToMinutes(timeStr) {
+    const [hStr, mStr] = timeStr.split(':');
+    let h = parseInt(hStr, 10);
+    const m = parseInt(mStr, 10);
+    
+    // Assume hours less than 8 (1, 2, 3, 4, 5, 6, 7) are PM
+    if (h < 8) {
+        h += 12;
+    }
+    return h * 60 + m;
+}
+
+// Helper to parse schedule string (e.g. "Mon/Wed/Fri 9:00-10:00")
+function parseSchedule(scheduleStr) {
+    if (!scheduleStr || typeof scheduleStr !== 'string') return null;
+    
+    const trimmed = scheduleStr.trim();
+    const parts = trimmed.split(/\s+/);
+    if (parts.length < 2) return null;
+    
+    const days = parts[0].split('/').map(d => d.trim().toLowerCase());
+    const timeRange = parts[1];
+    const timeParts = timeRange.split('-');
+    if (timeParts.length < 2) return null;
+    
+    try {
+        const start = parseTimeToMinutes(timeParts[0]);
+        const end = parseTimeToMinutes(timeParts[1]);
+        return { days, start, end };
+    } catch (err) {
+        return null;
+    }
+}
+
 // GET /courses - Fetch all active courses
 exports.getAllCourses = async (req, res) => {
     try {
@@ -122,6 +157,33 @@ exports.enrollStudent = async (req, res) => {
         const existing = await Enrollment.findOne({ courseId: id, studentId: student._id, status: 'enrolled' });
         if (existing) {
             return res.status(400).json({ success: false, error: 'Already enrolled' });
+        }
+
+        // Check for timetable conflicts
+        if (course.schedule) {
+            const newSchedule = parseSchedule(course.schedule);
+            if (newSchedule) {
+                const activeEnrollments = await Enrollment.find({ studentId: student._id, status: 'enrolled' }).populate('courseId');
+                for (const activeEnrollment of activeEnrollments) {
+                    const enrolledCourse = activeEnrollment.courseId;
+                    if (enrolledCourse && enrolledCourse.schedule) {
+                        const enrolledSchedule = parseSchedule(enrolledCourse.schedule);
+                        if (enrolledSchedule) {
+                            // Check day overlap
+                            const commonDays = newSchedule.days.filter(d => enrolledSchedule.days.includes(d));
+                            if (commonDays.length > 0) {
+                                // Check time overlap
+                                if (newSchedule.start < enrolledSchedule.end && enrolledSchedule.start < newSchedule.end) {
+                                    return res.status(400).json({
+                                        success: false,
+                                        error: 'Cannot enroll in this course because its schedule conflicts with another enrolled course.'
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         const enrollment = new Enrollment({ courseId: id, studentId: student._id, status: 'enrolled' });
